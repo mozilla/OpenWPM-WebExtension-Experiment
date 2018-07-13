@@ -1,0 +1,184 @@
+# Interface schema for `openwpm`
+# https://firefox-source-docs.mozilla.org/toolkit/components/extensions/webextensions/schema.html
+#
+# - properties
+# - functions
+# - events
+# - types
+#
+# Note: JSONSchema for WEE interfaces is a modified version of Draft-03.
+#
+# Note: possible `types` are here
+# - https://dxr.mozilla.org/mozilla-central/source/toolkit/components/extensions/Schemas.jsm#2417-2427
+# - type property:
+#   boolean, integer, number, string, array, object, or any.
+
+#
+# Note: "choices" is a non-standard extension to draft-03, see:
+# - https://dxr.mozilla.org/mozilla-central/source/toolkit/components/extensions/Schemas.jsm#2875-2879
+#
+
+---
+- namespace: openwpm
+  description: Interface for the OpenWPM WebExtension Experiment API.
+  types:
+  - id: NullableString
+    $schema: "http://json-schema.org/draft-04/schema"
+    oneOf: [
+      {type: 'null'},
+      {type: 'string'}]
+    choices: [
+      {type: 'null'},
+      {type: 'string'}]
+    testcases: [null, 'a string']
+
+  - id: NullableInteger
+    $schema: "http://json-schema.org/draft-04/schema"
+    oneOf: [
+      {type: 'null'},
+      {type: 'integer'}]
+    choices: [
+      {type: 'null'},
+      {type: 'integer'}]
+    testcases: [null, 1234567890]
+    failcases: ['1234567890', []]
+
+  - id: NullableNumber
+    $schema: "http://json-schema.org/draft-04/schema"
+    oneOf: [
+      {type: 'null'},
+      {type: 'number'}]
+    choices: [
+      {type: 'null'},
+      {type: 'number'}]
+    testcases: [null, 1234567890, 1234567890.123]
+    failcases: ['1234567890', '1234567890.123', []]
+
+  - id: openwpmStatusObject
+    $schema: "http://json-schema.org/draft-04/schema"
+    type: object
+    additionalProperties: true
+    properties:
+      foo:
+        type: 'string'
+
+    required:
+    - foo
+
+  - id: openwpmSetup
+    $schema: "http://json-schema.org/draft-04/schema"
+    type: object
+    properties:
+      cookie_instrument:
+        type: 'boolean'
+      js_instrument:
+        type: 'boolean'
+      cp_instrument:
+        type: 'boolean'
+      http_instrument:
+        type: 'boolean'
+      save_javascript:
+        type: 'boolean'
+      save_all_content:
+        type: 'boolean'
+
+    required:
+    - cookie_instrument
+    - js_instrument
+    - cp_instrument
+    - http_instrument
+    - save_javascript
+    - save_all_content
+    additionalProperties: true
+    testcases: [
+      {
+        cookie_instrument: false,
+        js_instrument: false,
+        cp_instrument: false,
+        http_instrument: false,
+        save_javascript: false,
+        save_all_content: false,
+      }
+    ]
+
+  functions:
+  - name: start
+    type: function
+    async: true
+    description: |
+      Start OpenWPM instrumentation. Fires onStarted if successful.
+    parameters:
+    - name: openwpmSetup
+      $ref: openwpmSetup
+
+    returns:
+    - $ref: openwpmStatusObject
+
+  - name: stop
+    type: function
+    async: true
+    defaultReturn: {reason: 'some-reason'}
+    description: |
+      Stop OpenWPM instrumentation.
+    parameters:
+    - name: anEndingAlias
+      type: 'string'
+
+    returns:
+    - $ref: anEndingAnswer
+
+  ## openwpm / client information things
+  - name: status
+    type: function
+    async: true
+    description: |
+      Return current OpenWPM status.
+    defaultReturn: {foo: "bar"}
+    parameters: []
+    returns:
+    - $ref: openwpmStatusObject
+
+  events:
+  - name: onStarted
+    type: function
+    defaultReturn: {foo: "bar"}
+    description: |
+      Fires when the OpenWPM instrumentation has started.
+    parameters:  # for the callback
+    - name: openwpmStatus
+      type: object
+
+  - name: onStopped
+    type: function
+    defaultReturn: {reason: 'some-reason'}
+    description: |
+      Fires when the OpenWPM instrumentation has stopped, either in the event of some errors that forces OpenWPM to stop, or upon `browser.openwpm.stop`.
+    parameters:  # for the callback
+    - name: ending
+      type: object
+
+- namespace:  openwpmDebug
+  description: Interface for Test Utilities
+  functions:
+  - name: throwAnExceptionSync
+    type: function
+    description: 'Throws an exception from a privileged sync function - for tests making sure that we can catch these in our web extension'
+    async: false
+    parameters:
+    - name: message
+      type: string
+
+  - name: throwAnExceptionAsync
+    type: function
+    description: 'Throws an exception from a privileged async function - for tests making sure that we can catch these in our web extension'
+    async: true
+    parameters:
+    - name: message
+      type: string
+
+  - name: dumpInternalState
+    type: function
+    async: true
+    description: |
+      Return `api.state`. Used for debugging.
+    parameters: []
