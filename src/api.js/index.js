@@ -28,7 +28,7 @@ class ApiEventEmitter extends EventEmitter {
 
 this.openwpm = class extends ExtensionAPI {
   /**
-   * @param {object} context the addon context
+   * @param {object} context the add-on context
    * @returns {object} api with openwpm, openwpmDebug keys
    */
   getAPI(context) {
@@ -41,7 +41,7 @@ this.openwpm = class extends ExtensionAPI {
     };
     return {
       openwpm: {
-        /* Start OpenWPM instrumentation */
+        /* Start OpenWPM instrumentation. Fires onStarted if successful. */
         start: async function start(openwpmSetup) {
           logger.debug("Called start openwpmSetup", openwpmSetup);
           const openwpmStatus = await this.status();
@@ -49,7 +49,7 @@ this.openwpm = class extends ExtensionAPI {
           return openwpmStatus;
         },
 
-        /* Stop OpenWPM instrumentation */
+        /* Stop OpenWPM instrumentation. */
         stop: async function stop(stopReason) {
           logger.debug("Called stop stopReason", stopReason);
           const ending = { reason: stopReason };
@@ -57,7 +57,7 @@ this.openwpm = class extends ExtensionAPI {
           return ending;
         },
 
-        /* Return current OpenWPM status */
+        /* Return current OpenWPM status. */
         status: async function status() {
           logger.debug("Called status()");
           return {
@@ -66,7 +66,7 @@ this.openwpm = class extends ExtensionAPI {
         },
 
         // https://firefox-source-docs.mozilla.org/toolkit/components/extensions/webextensions/events.html
-        /* Fires when the OpenWPM instrumentation has started */
+        /* Fires when the OpenWPM instrumentation has started. */
         onStarted: new EventManager(context, "openwpm:onStarted", fire => {
           const listener = (eventReference, openwpmStatus) => {
             fire.async(openwpmStatus);
@@ -78,7 +78,7 @@ this.openwpm = class extends ExtensionAPI {
         }).api(),
 
         // https://firefox-source-docs.mozilla.org/toolkit/components/extensions/webextensions/events.html
-        /* Fires when the OpenWPM instrumentation has stopped */
+        /* Fires when the OpenWPM instrumentation has stopped, either in the event of some errors that forces OpenWPM to stop, or upon `browser.openwpm.stop`. */
         onStopped: new EventManager(context, "openwpm:onStopped", fire => {
           const listener = (eventReference, ending) => {
             fire.async(ending);

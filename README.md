@@ -31,7 +31,7 @@ Allows writing add-ons that use one or many of OpenWPM's instrumentation modules
 2.  Copy the files to your 'privileged' src directory
 
     ```
-    npx installOpenWPM ./src/privileged --example
+    npx installOpenWPM src/privileged --example
     ```
 
     Suggestion: make this part of your `package.json:scripts.postinstall` script.
@@ -40,12 +40,12 @@ Allows writing add-ons that use one or many of OpenWPM's instrumentation modules
 
     ```
       "experiment_apis": {
-        "study": {
-          "schema": "./privileged/study/schema.json",
+        "openwpm": {
+          "schema": "./privileged/openwpm/schema.json",
           "parent": {
             "scopes": ["addon_parent"],
-            "script": "./privileged/study/api.js",
-            "paths": [["study"]]
+            "script": "./privileged/openwpm/api.js",
+            "paths": [["openwpm"]]
           }
         }
       },
@@ -76,9 +76,9 @@ Allows writing add-ons that use one or many of OpenWPM's instrumentation modules
 
       Notice the `experiment_apis` section. This maps `browser.openwpm` to the privileged api code. (See details below)
 
-    * [`study.js`](./test-addon/src/study.js)
+    * [`openwpmSetup.js`](./test-addon/src/openwpm.js)
 
-      Construct a `studySetup` usable by `browser.openwpm.setup`
+      Construct a `openwpmSetup` usable by `browser.openwpm.setup`
 
     * [`background.js`](./test-addon/src/background.js)
 

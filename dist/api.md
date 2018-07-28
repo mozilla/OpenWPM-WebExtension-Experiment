@@ -16,15 +16,15 @@ Interface for the OpenWPM WebExtension Experiment API.
   - $ref: 
   - optional: false
 
-### `browser.openwpm.stop( anEndingAlias )` 
+### `browser.openwpm.stop( stopReason )` 
 
   Stop OpenWPM instrumentation.
   
 
 **Parameters**
 
-- `anEndingAlias`
-  - type: anEndingAlias
+- `stopReason`
+  - type: stopReason
   - $ref: 
   - optional: false
 

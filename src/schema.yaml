@@ -117,15 +117,12 @@
   - name: stop
     type: function
     async: true
-    defaultReturn: {reason: 'some-reason'}
     description: |
       Stop OpenWPM instrumentation.
     parameters:
-    - name: anEndingAlias
+    - name: stopReason
       type: 'string'
-
-    returns:
-    - $ref: anEndingAnswer
+      optional: true
 
   ## openwpm / client information things
   - name: status
