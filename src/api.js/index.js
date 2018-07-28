@@ -9,10 +9,11 @@ logger.debug("Loading WebExtension Experiment");
 ChromeUtils.import("resource://gre/modules/ExtensionCommon.jsm");
 ChromeUtils.import("resource://gre/modules/ExtensionUtils.jsm");
 
-// eslint-disable-next-line no-undef
+/* eslint-disable no-undef */
 const { EventManager } = ExtensionCommon;
-// eslint-disable-next-line no-undef
-const { EventEmitter, ExtensionError } = ExtensionUtils;
+const { ExtensionError } = ExtensionUtils;
+const EventEmitter =
+  ExtensionCommon.EventEmitter || ExtensionUtils.EventEmitter;
 
 class ApiEventEmitter extends EventEmitter {
   emitStarted(openwpmStatus) {
