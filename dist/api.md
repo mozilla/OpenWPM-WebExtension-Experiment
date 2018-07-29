@@ -35,6 +35,30 @@ Interface for the OpenWPM WebExtension Experiment API.
 
 **Parameters**
 
+### `browser.openwpm.enableNetworkMonitorForTab( tabId )` 
+
+  Enables network monitoring for a specific tab.
+  
+
+**Parameters**
+
+- `tabId`
+  - type: tabId
+  - $ref: 
+  - optional: false
+
+### `browser.openwpm.getHarForTab( tabId )` 
+
+  Returns the current HAR for a specific tab (requires enabled network monitoring for the given tab).
+  
+
+**Parameters**
+
+- `tabId`
+  - type: tabId
+  - $ref: 
+  - optional: false
+
 ## Events
 
 ### `browser.openwpm.onStarted () ` Event

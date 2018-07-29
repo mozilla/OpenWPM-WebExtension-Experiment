@@ -3,6 +3,7 @@
 /* global ExtensionAPI */
 
 import logger from "./logger";
+import { Monitor } from "./Monitor";
 
 logger.debug("Loading WebExtension Experiment");
 
@@ -40,6 +41,8 @@ this.openwpm = class extends ExtensionAPI {
       started: false,
       stopped: null,
     };
+    // tmp - will maybe need to be a Set with one monitor per tab
+    let monitor;
     return {
       openwpm: {
         /* Start OpenWPM instrumentation. Fires onStarted if successful. */
@@ -64,6 +67,36 @@ this.openwpm = class extends ExtensionAPI {
           return {
             foo: "bar",
           };
+        },
+
+        /* Enables network monitoring for a specific tab. */
+        enableNetworkMonitorForTab: async function enableNetworkMonitorForTab(
+          tabId,
+        ) {
+          logger.debug("Called enableNetworkMonitorForTab(tabId)", tabId);
+          (async function() {
+            monitor = new Monitor(tabId);
+            await monitor.startTabMonitoring();
+            logger.debug("Started tab monitoring", monitor);
+          })().catch(error => {
+            logger.error("Exception in enableNetworkMonitorForTab", error);
+          });
+        },
+
+        /* Returns the HAR for a specific tab. */
+        getHarForTab: async function getHarForTab(tabId) {
+          logger.debug("Called getHarForTab(tabId)", tabId);
+          logger.debug("monitor", monitor);
+          if (!monitor) {
+            return null;
+          }
+          return (async function() {
+            const har = await monitor.getHAR();
+            logger.debug("har in getHarForTab", har);
+            return har;
+          })().catch(error => {
+            logger.error("Exception in getHarForTab", error);
+          });
         },
 
         // https://firefox-source-docs.mozilla.org/toolkit/components/extensions/webextensions/events.html

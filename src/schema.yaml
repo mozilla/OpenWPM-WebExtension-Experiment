@@ -133,6 +133,26 @@
     returns:
     - $ref: openwpmStatusObject
 
+  - name: enableNetworkMonitorForTab
+    type: function
+    async: true
+    description: |
+      Enables network monitoring for a specific tab.
+    parameters:
+    - name: tabId
+      type: 'integer'
+
+  - name: getHarForTab
+    type: function
+    async: true
+    description: |
+      Returns the current HAR for a specific tab (requires enabled network monitoring for the given tab).
+    parameters:
+    - name: tabId
+      type: 'integer'
+    returns:
+    - type: any
+
   events:
   - name: onStarted
     type: function
