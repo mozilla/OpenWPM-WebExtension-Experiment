@@ -26,7 +26,7 @@ Interface for the OpenWPM WebExtension Experiment API.
 - `stopReason`
   - type: stopReason
   - $ref: 
-  - optional: false
+  - optional: true
 
 ### `browser.openwpm.status(  )` 
 

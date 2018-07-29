@@ -110,7 +110,6 @@
     parameters:
     - name: openwpmSetup
       $ref: openwpmSetup
-
     returns:
     - $ref: openwpmStatusObject
 
@@ -124,7 +123,6 @@
       type: 'string'
       optional: true
 
-  ## openwpm / client information things
   - name: status
     type: function
     async: true
