@@ -4,9 +4,9 @@ const { require } = ChromeUtils.import(
   "resource://devtools/shared/Loader.jsm",
   {},
 );
-const { DebuggerServer } = require("devtools/server/main");
-const { DebuggerClient } = require("devtools/shared/client/debugger-client");
-const { TargetFactory } = require("devtools/client/framework/target");
+const {
+  DevToolsShim,
+} = require("chrome://devtools-startup/content/DevToolsShim.jsm");
 const Services = require("Services");
 const { NetMonitorAPI } = require("devtools/client/netmonitor/src/api");
 const {
@@ -16,22 +16,6 @@ const {
 export class Monitor {
   constructor() {
     this.tabSpecificMonitors = {};
-  }
-
-  /**
-   * Create our own debugger client object
-   * @returns {Promise<DebuggerClient>}
-   */
-  static async getDebuggerServerClient() {
-    if (this.client) {
-      return this.client;
-    }
-    DebuggerServer.init();
-    DebuggerServer.registerAllActors();
-    const client = new DebuggerClient(DebuggerServer.connectPipe());
-    await client.connect();
-    this.client = client;
-    return this.client;
   }
 
   /**
@@ -85,19 +69,9 @@ export class TabSpecificMonitor {
    * @returns {Promise<void>}
    */
   async start() {
-    const client = await Monitor.getDebuggerServerClient();
-    const tabBase = this.tabBase;
-
-    // Get the debugger's version of the tab object
-    const response = await client.getTab({ tab: tabBase.nativeTab });
-    const form = response.tab;
-
-    // Activate NetMonitor for tab
-    const target = await TargetFactory.forRemoteTab({
-      client,
-      form,
-      chrome: false,
-    });
+    const { tabBase } = this;
+    const { nativeTab } = tabBase;
+    const target = DevToolsShim.createTargetForTab(nativeTab);
     const MockToolbox = {
       target,
       getPanel: () => {},
