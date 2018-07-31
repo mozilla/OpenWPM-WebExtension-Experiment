@@ -69,6 +69,10 @@ export class TabSpecificMonitor {
    * @returns {Promise<void>}
    */
   async start() {
+    const netMonitor = this.getNetMonitorAPI();
+    if (netMonitor.toolbox) {
+      console.log("NetMonitor already connected to a Mock toolbox");
+    }
     const { tabBase } = this;
     const { nativeTab } = tabBase;
     const target = DevToolsShim.createTargetForTab(nativeTab);
@@ -76,7 +80,28 @@ export class TabSpecificMonitor {
       target,
       getPanel: () => {},
     };
-    await this.getNetMonitorAPI().connect(MockToolbox);
+    // Debug
+    target.on("close", () => {
+      console.log("target close", arguments);
+    });
+    target.on("will-navigate", () => {
+      console.log("target will-navigate", arguments);
+    });
+    target.on("navigate", () => {
+      console.log("target navigate", arguments);
+    });
+    target.on("tabNavigated", () => {
+      console.log("target tabNavigated", arguments);
+    });
+    target.on("tabDetached", () => {
+      console.log("target tabDetached", arguments);
+    });
+    console.log(
+      "netMonitor.toolbox before connect",
+      netMonitor.toolbox,
+      tabBase.id,
+    );
+    await netMonitor.connect(MockToolbox);
   }
 
   /**
@@ -129,6 +154,24 @@ export class TabSpecificMonitor {
         "getHAR from NetMonitor skipped since not yet connected to a tab",
       );
     } else {
+      const state = netMonitor.store.getState();
+      console.log("netMonitor.store.getState() just before HAR export", state);
+      /*
+      In order to supply options.includeResponseBodies to HAR exporter,
+      we have imported and modified code from NetMonitor.getHar() here:
+      const {
+        HarExporter,
+      } = require("devtools/client/netmonitor/src/har/har-exporter");
+      const {
+        getSortedRequests,
+      } = require("devtools/client/netmonitor/src/selectors/index");
+      const options = {
+        connector: netMonitor.connector,
+        items: getSortedRequests(state),
+      };
+      har = await HarExporter.getHar(options);
+      */
+
       har = await netMonitor.getHar();
       console.log("getHAR har from NetMonitor", har);
     }
