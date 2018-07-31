@@ -14,8 +14,11 @@ const {
 } = require("devtools/client/netmonitor/src/har/har-builder-utils");
 
 export class Monitor {
-  constructor(tabId) {
-    this.tabId = tabId;
+  /**
+   * @param tabBase TabBase
+   */
+  constructor(tabBase) {
+    this.tabBase = tabBase;
   }
 
   /**
@@ -41,16 +44,11 @@ export class Monitor {
    */
   async startTabMonitoring() {
     const client = await this.getDebuggerServerClient();
-    const tabId = this.tabId;
-    console.log("startTabMonitoring", tabId, client);
+    const tabBase = this.tabBase;
 
-    // Workaround since using tabId yields "Unable to find tab with tabId 'X'"
-    // Temporary "solution" is to simply use the second opened tab, until a method to find the corresponding tab to the WE tabId is found
-    const listTabsResponse = await client.listTabs();
-    console.log("listTabsResponse", listTabsResponse);
-    const form = listTabsResponse.tabs[1];
-    // const response = await client.getTab({ tab });
-    // const form = response.tab;
+    // Get the debugger's version of the tab object
+    const response = await client.getTab({ tab: tabBase.nativeTab });
+    const form = response.tab;
 
     // Activate NetMonitor for tab
     const target = await TargetFactory.forRemoteTab({

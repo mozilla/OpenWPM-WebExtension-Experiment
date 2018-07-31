@@ -34,7 +34,8 @@ this.openwpm = class extends ExtensionAPI {
    * @returns {object} api with openwpm, openwpmDebug keys
    */
   getAPI(context) {
-    // const { extension } = this;
+    const { extension } = this;
+    const { tabManager } = extension;
     const apiEventEmitter = new ApiEventEmitter();
     const api = this;
     api.state = {
@@ -75,7 +76,13 @@ this.openwpm = class extends ExtensionAPI {
         ) {
           logger.debug("Called enableNetworkMonitorForTab(tabId)", tabId);
           (async function() {
-            monitor = new Monitor(tabId);
+            // Find the TabBase object with the given tabId
+            const allTabBases = Array.from(tabManager.query(), tabBase => {
+              return tabBase;
+            });
+            const tabBase = allTabBases.find($tabBase => $tabBase.id === tabId);
+            // Setup a tab-specific monitor
+            monitor = new Monitor(tabBase);
             await monitor.startTabMonitoring();
             logger.debug("Started tab monitoring", monitor);
           })().catch(error => {
