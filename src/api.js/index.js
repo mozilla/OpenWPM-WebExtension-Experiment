@@ -36,15 +36,6 @@ this.openwpm = class extends ExtensionAPI {
   getAPI(context) {
     const { extension } = this;
     const { tabManager } = extension;
-    /**
-     * Find the TabBase object with the given tabId
-     */
-    const tabIdToTabBase = tabId => {
-      const allTabBases = Array.from(tabManager.query(), tabBase => {
-        return tabBase;
-      });
-      return allTabBases.find($tabBase => $tabBase.id === tabId);
-    };
     const apiEventEmitter = new ApiEventEmitter();
     const api = this;
     api.state = {
@@ -85,7 +76,7 @@ this.openwpm = class extends ExtensionAPI {
           logger.debug("Called enableNetworkMonitorForTab(tabId)", tabId);
           (async function() {
             // Setup a tab-specific monitor
-            const tabBase = tabIdToTabBase(tabId);
+            const tabBase = tabManager.get(tabId);
             await monitor.enableMonitoringForTab(tabBase);
             logger.debug(
               `Started tab monitoring for tab with id ${tabId}`,
@@ -103,7 +94,7 @@ this.openwpm = class extends ExtensionAPI {
           logger.debug("Called disableNetworkMonitorForTab(tabId)", tabId);
           (async function() {
             // Setup a tab-specific monitor
-            const tabBase = tabIdToTabBase(tabId);
+            const tabBase = tabManager.get(tabId);
             await monitor.disableMonitoringForTab(tabBase);
             logger.debug(
               `Stopped tab monitoring for tab with id ${tabId}`,
@@ -122,7 +113,7 @@ this.openwpm = class extends ExtensionAPI {
             return null;
           }
           return (async function() {
-            const tabBase = tabIdToTabBase(tabId);
+            const tabBase = tabManager.get(tabId);
             const har = await monitor.getHarForTab(tabBase);
             logger.debug("har in getHarForTab", har);
             return har;
