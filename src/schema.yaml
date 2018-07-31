@@ -142,6 +142,15 @@
     - name: tabId
       type: 'integer'
 
+  - name: disableNetworkMonitorForTab
+    type: function
+    async: true
+    description: |
+      Disables network monitoring for a specific tab.
+    parameters:
+    - name: tabId
+      type: 'integer'
+
   - name: getHarForTab
     type: function
     async: true

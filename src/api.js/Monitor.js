@@ -14,18 +14,15 @@ const {
 } = require("devtools/client/netmonitor/src/har/har-builder-utils");
 
 export class Monitor {
-  /**
-   * @param tabBase TabBase
-   */
-  constructor(tabBase) {
-    this.tabBase = tabBase;
+  constructor() {
+    this.tabSpecificMonitors = {};
   }
 
   /**
    * Create our own debugger client object
    * @returns {Promise<DebuggerClient>}
    */
-  async getDebuggerServerClient() {
+  static async getDebuggerServerClient() {
     if (this.client) {
       return this.client;
     }
@@ -38,12 +35,57 @@ export class Monitor {
   }
 
   /**
+   * @param tabBase TabBase
+   * @returns {Promise<void>}
+   */
+  async enableMonitoringForTab(tabBase) {
+    const tabSpecificMonitor = this.getTabSpecificMonitorByTabBase(tabBase);
+    return tabSpecificMonitor.start();
+  }
+
+  /**
+   * @param tabBase TabBase
+   * @returns {Promise<void>}
+   */
+  async disableMonitoringForTab(tabBase) {
+    const existingTabSpecificMonitor = this.tabSpecificMonitors[tabBase.id];
+    if (existingTabSpecificMonitor) {
+      await existingTabSpecificMonitor.stop();
+      delete this.tabSpecificMonitors[tabBase.id];
+    }
+  }
+
+  async getHarForTab(tabBase) {
+    const tabSpecificMonitor = this.getTabSpecificMonitorByTabBase(tabBase);
+    return tabSpecificMonitor.getHAR();
+  }
+
+  getTabSpecificMonitorByTabBase(tabBase) {
+    const existingTabSpecificMonitor = this.tabSpecificMonitors[tabBase.id];
+    if (existingTabSpecificMonitor) {
+      return existingTabSpecificMonitor;
+    }
+    const tabSpecificMonitor = new TabSpecificMonitor(tabBase);
+    this.tabSpecificMonitors[tabBase.id] = tabSpecificMonitor;
+    return tabSpecificMonitor;
+  }
+}
+
+export class TabSpecificMonitor {
+  /**
+   * @param tabBase TabBase
+   */
+  constructor(tabBase) {
+    this.tabBase = tabBase;
+  }
+
+  /**
    * Initialize NetMonitorAPI object and connect to the
    * Firefox backend for a specific tab
    * @returns {Promise<void>}
    */
-  async startTabMonitoring() {
-    const client = await this.getDebuggerServerClient();
+  async start() {
+    const client = await Monitor.getDebuggerServerClient();
     const tabBase = this.tabBase;
 
     // Get the debugger's version of the tab object
@@ -61,6 +103,13 @@ export class Monitor {
       getPanel: () => {},
     };
     await this.getNetMonitorAPI().connect(MockToolbox);
+  }
+
+  /**
+   * @returns {Promise<void>}
+   */
+  async stop() {
+    await this.getNetMonitorAPI().destroy();
   }
 
   /**

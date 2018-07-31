@@ -36,14 +36,22 @@ this.openwpm = class extends ExtensionAPI {
   getAPI(context) {
     const { extension } = this;
     const { tabManager } = extension;
+    /**
+     * Find the TabBase object with the given tabId
+     */
+    const tabIdToTabBase = tabId => {
+      const allTabBases = Array.from(tabManager.query(), tabBase => {
+        return tabBase;
+      });
+      return allTabBases.find($tabBase => $tabBase.id === tabId);
+    };
     const apiEventEmitter = new ApiEventEmitter();
     const api = this;
     api.state = {
       started: false,
       stopped: null,
     };
-    // tmp - will maybe need to be a Set with one monitor per tab
-    let monitor;
+    const monitor = new Monitor();
     return {
       openwpm: {
         /* Start OpenWPM instrumentation. Fires onStarted if successful. */
@@ -76,17 +84,33 @@ this.openwpm = class extends ExtensionAPI {
         ) {
           logger.debug("Called enableNetworkMonitorForTab(tabId)", tabId);
           (async function() {
-            // Find the TabBase object with the given tabId
-            const allTabBases = Array.from(tabManager.query(), tabBase => {
-              return tabBase;
-            });
-            const tabBase = allTabBases.find($tabBase => $tabBase.id === tabId);
             // Setup a tab-specific monitor
-            monitor = new Monitor(tabBase);
-            await monitor.startTabMonitoring();
-            logger.debug("Started tab monitoring", monitor);
+            const tabBase = tabIdToTabBase(tabId);
+            await monitor.enableMonitoringForTab(tabBase);
+            logger.debug(
+              `Started tab monitoring for tab with id ${tabId}`,
+              monitor,
+            );
           })().catch(error => {
             logger.error("Exception in enableNetworkMonitorForTab", error);
+          });
+        },
+
+        /* Disables network monitoring for a specific tab. */
+        disableNetworkMonitorForTab: async function disableNetworkMonitorForTab(
+          tabId,
+        ) {
+          logger.debug("Called disableNetworkMonitorForTab(tabId)", tabId);
+          (async function() {
+            // Setup a tab-specific monitor
+            const tabBase = tabIdToTabBase(tabId);
+            await monitor.disableMonitoringForTab(tabBase);
+            logger.debug(
+              `Stopped tab monitoring for tab with id ${tabId}`,
+              monitor,
+            );
+          })().catch(error => {
+            logger.error("Exception in disableNetworkMonitorForTab", error);
           });
         },
 
@@ -98,7 +122,8 @@ this.openwpm = class extends ExtensionAPI {
             return null;
           }
           return (async function() {
-            const har = await monitor.getHAR();
+            const tabBase = tabIdToTabBase(tabId);
+            const har = await monitor.getHarForTab(tabBase);
             logger.debug("har in getHarForTab", har);
             return har;
           })().catch(error => {
