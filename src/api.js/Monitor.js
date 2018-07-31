@@ -88,12 +88,16 @@ export class TabSpecificMonitor {
 
   /**
    * The monitor is considered connected
-   * if its NetMonitorAPI instance has its toolbox property set
+   * if its NetMonitorAPI instance has its
+   * connector, connector.connector and toolbox properties set
    * @returns {boolean}
    */
-  connected() {
-    const netMonitor = this.getNetMonitorAPI();
-    return !!netMonitor.toolbox;
+  connected(netMonitor) {
+    return !!(
+      netMonitor.connector &&
+      netMonitor.connector.connector &&
+      netMonitor.toolbox
+    );
   }
 
   /**
@@ -118,12 +122,13 @@ export class TabSpecificMonitor {
   async getHAR() {
     console.log("getHAR");
     let har;
-    if (!this.connected()) {
+
+    const netMonitor = this.getNetMonitorAPI();
+    if (!this.connected(netMonitor)) {
       console.log(
         "getHAR from NetMonitor skipped since not yet connected to a tab",
       );
     } else {
-      const netMonitor = this.getNetMonitorAPI();
       har = await netMonitor.getHar();
       console.log("getHAR har from NetMonitor", har);
     }
