@@ -60,7 +60,7 @@
     "build": "yaml2json src/schema.yaml -p > dist/schema.json && npm run generate && cd src && webpack",
     "eslint": "eslint . --ext js --ext json",
     "eslint-fix": "npm run eslint -- --fix",
-    "format": "prettier '**/*.{css,js,jsm,json,md}' --trailing-comma=all --ignore-path=.eslintignore --write",
+    "format": "# disabled due to issue with windows - prettier '**/*.{css,js,jsm,json,md}' --trailing-comma=all --ignore-path=.eslintignore --write",
     "generate": "npm-run-all -s -n generate:verifyWeeSchema generate:documentSchema generate:generateStubApi",
     "generate:documentSchema": "documentSchema dist/schema.json > dist/api.md",
     "generate:generateStubApi": "generateStubApi dist/schema.json > src/stubApi.js",
