@@ -81,11 +81,15 @@ export class TabSpecificMonitor {
       getPanel: () => {},
     };
     // Debug
-    target.on("close", () => {
+    target.on("close", async () => {
       console.log("target close", arguments);
+      const har = await this.getHAR();
+      console.log("har in target:close", har);
     });
-    target.on("will-navigate", () => {
+    target.on("will-navigate", async () => {
       console.log("target will-navigate", arguments);
+      const har = await this.getHAR();
+      console.log("har in target:will-navigate", har);
     });
     target.on("navigate", () => {
       console.log("target navigate", arguments);
