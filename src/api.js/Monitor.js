@@ -101,6 +101,8 @@ export class TabSpecificMonitor {
       netMonitor.toolbox,
       tabBase.id,
     );
+    await target.makeRemote();
+    await target.activeConsole.startListeners(["NetworkActivity"]);
     await netMonitor.connect(MockToolbox);
   }
 
