@@ -1,5 +1,7 @@
 "use strict";
 
+import { NewTabObserver } from "./NewTabObserver";
+
 const { require } = ChromeUtils.import(
   "resource://devtools/shared/Loader.jsm",
   {},
@@ -16,6 +18,17 @@ const {
 export class Monitor {
   constructor() {
     this.tabSpecificMonitors = {};
+    this.newTabObserver = new NewTabObserver();
+  }
+
+  async startMonitoringNewTabs(tabManager) {
+    console.log("startMonitoringNewTabs - this.newTabObserver", this.newTabObserver);
+    this.newTabObserver.init(this, tabManager);
+  }
+
+  async stopMonitoringNewTabs() {
+    console.log("stopMonitoringNewTabs - this.newTabObserver", this.newTabObserver);
+    this.newTabObserver.uninit();
   }
 
   /**
